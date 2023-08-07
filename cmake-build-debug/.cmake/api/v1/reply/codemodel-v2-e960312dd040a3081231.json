@@ -1,0 +1,123 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "2.8"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "ORB_SLAM2",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ORB_SLAM2::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ORB_SLAM2-Debug-7541b2fa84a9486293bb.json",
+					"name" : "ORB_SLAM2",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "bin_vocabulary::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-bin_vocabulary-Debug-cb8f685129e0b13212f7.json",
+					"name" : "bin_vocabulary",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mono_euroc::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mono_euroc-Debug-5fad8bfbd7e011fc094d.json",
+					"name" : "mono_euroc",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mono_kitti::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mono_kitti-Debug-b1c3effeadbdabefb967.json",
+					"name" : "mono_kitti",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mono_tum::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mono_tum-Debug-0743be030916d9962429.json",
+					"name" : "mono_tum",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rgbd_tum::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rgbd_tum-Debug-728c05ee72db876c8d55.json",
+					"name" : "rgbd_tum",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "stereo_euroc::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-stereo_euroc-Debug-9f5be10e812309bdb580.json",
+					"name" : "stereo_euroc",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "stereo_kitti::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-stereo_kitti-Debug-8b25e367d288f6b49454.json",
+					"name" : "stereo_kitti",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/jiho/slam/ORB_SLAM2_test/cmake-build-debug",
+		"source" : "/home/jiho/slam/ORB_SLAM2_test"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 5
+	}
+}
