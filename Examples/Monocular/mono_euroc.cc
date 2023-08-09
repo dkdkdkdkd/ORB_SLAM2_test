@@ -106,8 +106,10 @@ int main(int argc, char **argv)
         else if(ni>0)
             T = tframe-vTimestamps[ni-1];
 
-        if(ttrack<T)
+        if(ttrack<T){
+            printf("%lf\n", T-ttrack);
             std::this_thread::sleep_for(std::chrono::microseconds(static_cast<size_t>((T-ttrack)*1e6)));
+        }
     }
 
     // Stop all threads
