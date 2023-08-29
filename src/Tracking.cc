@@ -20,7 +20,8 @@
 
 
 #include "Tracking.h"
-
+#include <opencv2/opencv.hpp>
+#include <opencv2/aruco.hpp>
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
 
@@ -39,6 +40,7 @@
 
 
 using namespace std;
+using namespace cv;
 
 namespace ORB_SLAM2
 {
@@ -269,6 +271,7 @@ void Tracking::Track()
 {
     if(mState==NO_IMAGES_YET)
     {
+        
         mState = NOT_INITIALIZED;
     }
 
