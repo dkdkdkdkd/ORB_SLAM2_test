@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     cout << "video in the sequence: " << endl << endl;
     printf("hello2");
     // video capture
-    VideoCapture cap(0);
+    VideoCapture cap(1);
 
     if (!cap.isOpened())
     {
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
             std::this_thread::sleep_for(std::chrono::microseconds(static_cast<size_t>((T-ttrack)*1e6)));
         
     }
-
+        
     // Stop all threads
     SLAM.Shutdown();
     cout << "------end------" << endl << endl;

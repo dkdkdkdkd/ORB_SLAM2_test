@@ -256,8 +256,11 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
         else
             cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
     }
-
-    if(mState==NOT_INITIALIZED || mState==NO_IMAGES_YET)
+    // if (mState==NO_IMAGES_YET)
+    // {
+        
+    // }
+    if(mState==NOT_INITIALIZED||mState==NO_IMAGES_YET)
         mCurrentFrame = Frame(mImGray,timestamp,mpIniORBextractor,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
     else
         mCurrentFrame = Frame(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
@@ -269,17 +272,17 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
 
 void Tracking::Track()
 {
-    if(mState==NO_IMAGES_YET)
+    if(mState==NOMAkER)
     {
-        
-        mState = NOT_INITIALIZED;
+        return;
     }
+    else if(mState==NO_IMAGES_YET)
+        mState = NOT_INITIALIZED;
 
     mLastProcessedState=mState;
 
     // Get Map Mutex -> Map cannot be changed
     unique_lock<mutex> lock(mpMap->mMutexMapUpdate);
-
     if(mState==NOT_INITIALIZED)
     {
         if(mSensor==System::STEREO || mSensor==System::RGBD)
@@ -1595,6 +1598,46 @@ void Tracking::InformOnlyTracking(const bool &flag)
     mbOnlyTracking = flag;
 }
 
+void System::SaveEntireMap(const string &dir) {
+    string fname_pts = dir + "/MapPoints.txt";
+    ofstream f_pts;
+    f_pts.open(fname_pts.c_str());
+    f_pts << fixed;
 
+    const vector<MapPoint *> &vpMPs = mpMap->GetAllMapPoints();
+    for (size_t i = 0, iend = vpMPs.size(); i < iend; i++) {
+        if (vpMPs[i]->isBad())
+            continue;
+        cv::Mat pos = vpMPs[i]->GetWorldPos();
+        f_pts << setprecision(9) << pos.at<float>(0) << " " << pos.at<float>(1) << " " << pos.at<float>(2) << endl;
+    }
+
+    // string fname_objects = dir + "/MapObjects.txt";
+    // ofstream f_obj;
+    // f_obj.open(fname_objects.c_str());
+    // f_obj << fixed;
+    // auto mvpMapObjects = mpMap->GetAllMapObjects();
+    // sort(mvpMapObjects.begin(), mvpMapObjects.end(), MapObject::lId);
+    // for (MapObject *pMO : mvpMapObjects) {
+    //     if (!pMO)
+    //         continue;
+    //     if (pMO->isBad())
+    //         continue;
+    //     if (pMO->GetRenderId() < 0)
+    //         continue;
+    //     if (pMO->isDynamic())
+    //         continue;
+
+    //     f_obj << pMO->mnId << endl;
+    //     auto Two = pMO->GetPoseSim3();
+    //     f_obj << setprecision(9) << Two(0, 0) << " " << Two(0, 1) << " " << Two(0, 2) << " " << Two(0, 3) << " " <<
+    //           Two(1, 0) << " " << Two(1, 1) << " " << Two(1, 2) << " " << Two(1, 3) << " " <<
+    //           Two(2, 0) << " " << Two(2, 1) << " " << Two(2, 2) << " " << Two(2, 3) << endl;
+    //     f_obj << setprecision(9) << pMO->GetShapeCode().transpose() << endl;
+    // }
+    // f_obj.close();
+
+    SaveTrajectoryKITTI(dir + "/Cameras.txt");
+}
 
 } //namespace ORB_SLAM

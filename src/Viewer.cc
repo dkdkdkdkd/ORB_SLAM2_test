@@ -136,10 +136,10 @@ void Viewer::Run()
 
         cv::Mat im = mpFrameDrawer->DrawFrame();
         cv::imshow("ORB-SLAM2: Current Frame",im);
-        // if (cv::waitKey(1) == 27)
-        //     break;
-
-        cv::waitKey(mT);
+        if (cv::waitKey(mT) == 27)
+            mpSystem->Shutdown();
+        // else
+        // cv::waitKey(mT);
 
         if(menuReset)
         {

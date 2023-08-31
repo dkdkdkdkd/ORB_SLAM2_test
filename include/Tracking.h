@@ -84,7 +84,8 @@ public:
         NO_IMAGES_YET=0,
         NOT_INITIALIZED=1,
         OK=2,
-        LOST=3
+        LOST=3,
+        NOMAkER=4
     };
 
     eTrackingState mState;
