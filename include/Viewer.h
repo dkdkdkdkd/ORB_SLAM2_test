@@ -26,6 +26,8 @@
 #include "MapDrawer.h"
 #include "Tracking.h"
 #include "System.h"
+#include "opencv2/opencv.hpp"
+#include <opencv2/aruco.hpp>
 
 #include <mutex>
 
@@ -58,6 +60,8 @@ public:
 
     void Release();
 
+    
+
 private:
 
     bool Stop();
@@ -66,6 +70,8 @@ private:
     FrameDrawer* mpFrameDrawer;
     MapDrawer* mpMapDrawer;
     Tracking* mpTracker;
+    
+
 
     // 1/fps in ms
     double mT;

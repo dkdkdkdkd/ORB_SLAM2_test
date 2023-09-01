@@ -43,6 +43,23 @@ void Map::AddMapPoint(MapPoint *pMP)
     mspMapPoints.insert(pMP);
 }
 
+void Map::AddArucoMarker(ArucoMarker *pAM)
+{   
+    unique_lock<mutex> lock(mMutexMap);
+    bool markerExists = false;
+
+    for (ArucoMarker *marker : mspAruceMarker){
+        if (marker->mMarkerId == pAM->mMarkerId){
+            marker->SetMarkerPos(pAM->pose);
+            markerExists = true;
+            break;
+        }
+    }
+    if (!markerExists)
+        mspAruceMarker.insert(pAM);
+
+}
+
 void Map::EraseMapPoint(MapPoint *pMP)
 {
     unique_lock<mutex> lock(mMutexMap);
@@ -89,6 +106,12 @@ vector<MapPoint*> Map::GetAllMapPoints()
 {
     unique_lock<mutex> lock(mMutexMap);
     return vector<MapPoint*>(mspMapPoints.begin(),mspMapPoints.end());
+}
+
+vector<ArucoMarker*> Map::GetAllArucoMarker()
+{
+    unique_lock<mutex> lock(mMutexMap);
+    return vector<ArucoMarker*>(mspAruceMarker.begin(),mspAruceMarker.end());
 }
 
 long unsigned int Map::MapPointsInMap()

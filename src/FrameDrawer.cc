@@ -23,7 +23,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-
+#include <opencv2/aruco.hpp>
 #include<mutex>
 
 namespace ORB_SLAM2
@@ -108,8 +108,9 @@ cv::Mat FrameDrawer::DrawFrame()
                 // This is a match to a MapPoint in the map
                 if(vbMap[i])
                 {
-                    cv::rectangle(im,pt1,pt2,cv::Scalar(0,255,0));
+                    // cv::rectangle(im,pt1,pt2,cv::Scalar(0,255,0));
                     cv::circle(im,vCurrentKeys[i].pt,2,cv::Scalar(0,255,0),-1);
+                    cv::aruco::drawDetectedMarkers(im, markerCorners, markerIds);
                     mnTracked++;
                 }
                 else // This is match to a "visual odometry" MapPoint created in the last frame
@@ -176,7 +177,9 @@ void FrameDrawer::Update(Tracking *pTracker)
     mvbVO = vector<bool>(N,false);
     mvbMap = vector<bool>(N,false);
     mbOnlyTracking = pTracker->mbOnlyTracking;
-
+    
+    markerIds = pTracker->markerIds;
+    markerCorners = pTracker->markerCorners;
 
     if(pTracker->mLastProcessedState==Tracking::NOT_INITIALIZED)
     {

@@ -24,6 +24,7 @@
 
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
+#include <opencv2/aruco.hpp>
 
 #include"Viewer.h"
 #include"FrameDrawer.h"
@@ -117,6 +118,12 @@ public:
 
     void Reset();
 
+    // aruco marker add
+    std::vector<int> markerIds;
+    cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_1000);
+    std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
+    cv::Ptr<cv::aruco::DetectorParameters> parameters = cv::aruco::DetectorParameters::create();
+    
 protected:
 
     // Main tracking function. It is independent of the input sensor.

@@ -198,6 +198,8 @@ public:
     const int mnMaxY;
     const cv::Mat mK;
 
+    // MapPoints associated to keypoints
+    std::vector<MapPoint*> mvpMapPoints;
 
     // The following variables need to be accessed trough a mutex to be thread safe.
 protected:
@@ -209,8 +211,6 @@ protected:
 
     cv::Mat Cw; // Stereo middel point. Only for visualization
 
-    // MapPoints associated to keypoints
-    std::vector<MapPoint*> mvpMapPoints;
 
     // BoW
     KeyFrameDatabase* mpKeyFrameDB;

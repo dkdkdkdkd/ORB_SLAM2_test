@@ -420,9 +420,30 @@ void Tracking::Track()
             mState = OK;
         else
             mState=LOST;
-
+        
         // Update drawer
         mpFrameDrawer->Update(this);
+        
+        cv::aruco::detectMarkers(mImGray, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
+        vector<Point3f> objectPoints = {Point3f(0.084, 0.084, 0),
+                                        Point3f(0.084, -0.084, 0), 
+                                        Point3f(-0.084, -0.084 , 0),
+                                        Point3f(-0.084, 0.084 , 0)};
+        float a = 0.4, b = 0.5;
+    vector<Point3f> objectPoints2 = {Point3f(0.084 + a, 0.084 + b, 0), 
+                                     Point3f(0.084 + a, -0.084 + b, 0), 
+                                     Point3f(-0.084 + a, -0.084 + b , 0), 
+                                     Point3f(-0.084 + a, 0.084 + b , 0)};
+        Mat tvec, rvec;
+        if(markerCorners.size()!=0){
+            solvePnP(objectPoints2, markerCorners[0], mK, mDistCoef, rvec, tvec);
+            // Mat wtvec = mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3) *tvec  + mCurrentFrame.mTcw.rowRange(0,3).col(3);
+            Mat wtvec = mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv()*(tvec-mCurrentFrame.mTcw.rowRange(0,3).col(3));
+            ArucoMarker* mark = new ArucoMarker(markerIds[0], mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv(), wtvec);
+            mpMap->AddArucoMarker(mark);
+        }
+
+
 
         // If tracking were good, check if we insert a keyframe
         if(bOK)
@@ -474,7 +495,6 @@ void Tracking::Track()
                     mCurrentFrame.mvpMapPoints[i]=static_cast<MapPoint*>(NULL);
             }
         }
-
         // Reset if the camera get lost soon after initialization
         if(mState==LOST)
         {

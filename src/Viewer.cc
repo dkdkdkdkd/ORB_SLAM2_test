@@ -69,6 +69,7 @@ void Viewer::Run()
     pangolin::Var<bool> menuFollowCamera("menu.Follow Camera",true,true);
     pangolin::Var<bool> menuShowPoints("menu.Show Points",true,true);
     pangolin::Var<bool> menuShowKeyFrames("menu.Show KeyFrames",true,true);
+    pangolin::Var<bool> menuArucoMarker("menu.Show ArucoMarker",true,true);
     pangolin::Var<bool> menuShowGraph("menu.Show Graph",true,true);
     pangolin::Var<bool> menuLocalizationMode("menu.Localization Mode",mbReuseMap,true);
     pangolin::Var<bool> menuReset("menu.Reset",false,false);
@@ -129,6 +130,8 @@ void Viewer::Run()
         mpMapDrawer->DrawCurrentCamera(Twc);
         if(menuShowKeyFrames || menuShowGraph)
             mpMapDrawer->DrawKeyFrames(menuShowKeyFrames,menuShowGraph);
+        if(menuArucoMarker)
+            mpMapDrawer->DrawArucoMarker(menuArucoMarker);
         if(menuShowPoints)
             mpMapDrawer->DrawMapPoints();
 

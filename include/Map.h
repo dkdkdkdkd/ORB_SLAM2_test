@@ -24,7 +24,7 @@
 #include "MapPoint.h"
 #include "KeyFrame.h"
 #include <set>
-
+#include "ArucoMarker.h"
 #include <mutex>
 
 #include "BoostArchiver.h"
@@ -43,6 +43,7 @@ public:
 
     void AddKeyFrame(KeyFrame* pKF);
     void AddMapPoint(MapPoint* pMP);
+    void AddArucoMarker(ArucoMarker* pAM);
     void EraseMapPoint(MapPoint* pMP);
     void EraseKeyFrame(KeyFrame* pKF);
     void SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs);
@@ -51,6 +52,7 @@ public:
 
     std::vector<KeyFrame*> GetAllKeyFrames();
     std::vector<MapPoint*> GetAllMapPoints();
+    std::vector<ArucoMarker*> GetAllArucoMarker();
     std::vector<MapPoint*> GetReferenceMapPoints();
 
     long unsigned int MapPointsInMap();
@@ -77,6 +79,7 @@ private:
 protected:
     std::set<MapPoint*> mspMapPoints;
     std::set<KeyFrame*> mspKeyFrames;
+    std::set<ArucoMarker*> mspAruceMarker;
 
     std::vector<MapPoint*> mvpReferenceMapPoints;
 

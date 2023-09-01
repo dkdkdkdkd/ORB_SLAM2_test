@@ -176,6 +176,56 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph)
     }
 }
 
+void MapDrawer::DrawArucoMarker(const bool bDrawAM)
+{
+    const float &w = mKeyFrameSize;
+    const float h = w*0.75;
+    const float z = w*0.6;
+
+    const vector<ArucoMarker*> vpAMs = mpMap->GetAllArucoMarker();
+
+    if(bDrawAM)
+    {
+        for(size_t i=0; i<vpAMs.size(); i++)
+        {
+            ArucoMarker* pKF = vpAMs[i];
+            cv::Mat Twc = pKF->GetMarkerPos().t();
+
+            glPushMatrix();
+
+            glMultMatrixf(Twc.ptr<GLfloat>(0));
+
+            glLineWidth(mKeyFrameLineWidth);
+            glColor3f(1.0f,0.0f,0.0f);
+            glBegin(GL_LINES);
+            glVertex3f(0,0,0);
+            glVertex3f(w,h,z);
+            glVertex3f(0,0,0);
+            glVertex3f(w,-h,z);
+            glVertex3f(0,0,0);
+            glVertex3f(-w,-h,z);
+            glVertex3f(0,0,0);
+            glVertex3f(-w,h,z);
+
+            glVertex3f(w,h,z);
+            glVertex3f(w,-h,z);
+
+            glVertex3f(-w,h,z);
+            glVertex3f(-w,-h,z);
+
+            glVertex3f(-w,h,z);
+            glVertex3f(w,h,z);
+
+            glVertex3f(-w,-h,z);
+            glVertex3f(w,-h,z);
+            glEnd();
+
+            glPopMatrix();
+        }
+    }
+
+}
+
 void MapDrawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc)
 {
     const float &w = mCameraSize;
