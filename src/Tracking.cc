@@ -425,18 +425,19 @@ void Tracking::Track()
         mpFrameDrawer->Update(this);
         
         cv::aruco::detectMarkers(mImGray, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
-        vector<Point3f> objectPoints = {Point3f(0.084, 0.084, 0),
-                                        Point3f(0.084, -0.084, 0), 
-                                        Point3f(-0.084, -0.084 , 0),
-                                        Point3f(-0.084, 0.084 , 0)};
-        float a = 0.4, b = 0.5;
-    vector<Point3f> objectPoints2 = {Point3f(0.084 + a, 0.084 + b, 0), 
-                                     Point3f(0.084 + a, -0.084 + b, 0), 
-                                     Point3f(-0.084 + a, -0.084 + b , 0), 
-                                     Point3f(-0.084 + a, 0.084 + b , 0)};
+        float ratio=0.084f;
+        vector<Point3f> objectPoints = {Point3f(ratio, ratio, 0),
+                                        Point3f(ratio, -ratio, 0), 
+                                        Point3f(-ratio, -ratio , 0),
+                                        Point3f(-ratio, ratio , 0)};
+
+                                        // {Point3f(0.084, 0.084, 0),
+                                        // Point3f(0.084, -0.084, 0), 
+                                        // Point3f(-0.084, -0.084 , 0),
+                                        // Point3f(-0.084, 0.084 , 0)};
         Mat tvec, rvec;
         if(markerCorners.size()!=0){
-            solvePnP(objectPoints2, markerCorners[0], mK, mDistCoef, rvec, tvec);
+            solvePnP(objectPoints, markerCorners[0], mK, mDistCoef, rvec, tvec);
             // Mat wtvec = mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3) *tvec  + mCurrentFrame.mTcw.rowRange(0,3).col(3);
             Mat wtvec = mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv()*(tvec-mCurrentFrame.mTcw.rowRange(0,3).col(3));
             ArucoMarker* mark = new ArucoMarker(markerIds[0], mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv(), wtvec);
@@ -850,8 +851,9 @@ void Tracking::UpdateLastFrame()
         }
     }
 
-    if(vDepthIdx.empty())
+    if(vDepthIdx.empty()){
         return;
+    }
 
     sort(vDepthIdx.begin(),vDepthIdx.end());
 
@@ -871,7 +873,6 @@ void Tracking::UpdateLastFrame()
         {
             bCreateNew = true;
         }
-
         if(bCreateNew)
         {
             cv::Mat x3D = mLastFrame.UnprojectStereo(i);
@@ -1090,6 +1091,7 @@ bool Tracking::NeedNewKeyFrame()
 
 void Tracking::CreateNewKeyFrame()
 {
+
     if(!mpLocalMapper->SetNotStop(true))
         return;
 
@@ -1115,7 +1117,6 @@ void Tracking::CreateNewKeyFrame()
                 vDepthIdx.push_back(make_pair(z,i));
             }
         }
-
         if(!vDepthIdx.empty())
         {
             sort(vDepthIdx.begin(),vDepthIdx.end());
@@ -1135,7 +1136,6 @@ void Tracking::CreateNewKeyFrame()
                     bCreateNew = true;
                     mCurrentFrame.mvpMapPoints[i] = static_cast<MapPoint*>(NULL);
                 }
-
                 if(bCreateNew)
                 {
                     cv::Mat x3D = mCurrentFrame.UnprojectStereo(i);
@@ -1631,6 +1631,26 @@ void System::SaveEntireMap(const string &dir) {
         cv::Mat pos = vpMPs[i]->GetWorldPos();
         f_pts << setprecision(9) << pos.at<float>(0) << " " << pos.at<float>(1) << " " << pos.at<float>(2) << endl;
     }
+
+    string fname_arucomarker = dir + "/AruceMarkers.txt";
+    ofstream f_ams;
+    f_ams.open(fname_arucomarker.c_str());
+    f_ams << fixed;
+    cout<<"marker save"<<endl;
+
+    auto mvpArucoMarker = mpMap->GetAllArucoMarker();
+    for (ArucoMarker *pMO : mvpArucoMarker) {
+        if (!pMO){
+            cout<<"marker None"<<endl;
+            continue;
+        }
+        f_ams << pMO->mMarkerId << endl;
+        auto Two = pMO->GetMarkerPos();
+        f_ams << setprecision(9) << Two.at<float>(0, 0) << " " << Two.at<float>(0, 1) << " " << Two.at<float>(0, 2) << " " << Two.at<float>(0, 3) << " " <<
+              Two.at<float>(1, 0) << " " << Two.at<float>(1, 1) << " " << Two.at<float>(1, 2) << " " << Two.at<float>(1, 3) << " " <<
+              Two.at<float>(2, 0) << " " << Two.at<float>(2, 1) << " " << Two.at<float>(2, 2) << " " << Two.at<float>(2, 3) << endl;
+    }
+    f_ams.close();
 
     // string fname_objects = dir + "/MapObjects.txt";
     // ofstream f_obj;

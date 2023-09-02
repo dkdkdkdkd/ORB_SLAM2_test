@@ -666,6 +666,7 @@ void Frame::ComputeStereoFromRGBD(const cv::Mat &imDepth)
 cv::Mat Frame::UnprojectStereo(const int &i)
 {
     const float z = mvDepth[i];
+    cout << z << endl;
     if(z>0)
     {
         const float u = mvKeysUn[i].pt.x;
