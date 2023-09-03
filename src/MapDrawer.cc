@@ -179,8 +179,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph)
 void MapDrawer::DrawArucoMarker(const bool bDrawAM)
 {
     const float &w = mKeyFrameSize;
-    const float h = w*0.75;
-    const float z = w*0.6;
+    const float h = w*1;
 
     const vector<ArucoMarker*> vpAMs = mpMap->GetAllArucoMarker();
 
@@ -198,28 +197,20 @@ void MapDrawer::DrawArucoMarker(const bool bDrawAM)
             glLineWidth(mKeyFrameLineWidth);
             glColor3f(1.0f,0.0f,0.0f);
             glBegin(GL_LINES);
-            glVertex3f(0,0,0);
-            glVertex3f(w,h,z);
-            glVertex3f(0,0,0);
-            glVertex3f(w,-h,z);
-            glVertex3f(0,0,0);
-            glVertex3f(-w,-h,z);
-            glVertex3f(0,0,0);
-            glVertex3f(-w,h,z);
-
-            glVertex3f(w,h,z);
-            glVertex3f(w,-h,z);
-
-            glVertex3f(-w,h,z);
-            glVertex3f(-w,-h,z);
-
-            glVertex3f(-w,h,z);
-            glVertex3f(w,h,z);
-
-            glVertex3f(-w,-h,z);
-            glVertex3f(w,-h,z);
+             
+            glVertex3f(h, h, 0.0f);   // 오른쪽 위에서 시작
+            glVertex3f(-h, h, 0.0f);  // 왼쪽 위로 이동
+            glVertex3f(-h, h, 0.0f);  // 왼쪽 위에서 시작
+            glVertex3f(-h, -h, 0.0f);
+            glVertex3f(-h, -h, 0.0f); // 왼쪽 아래에서 시작
+            glVertex3f(h, -h, 0.0f);  // 오른쪽 아래로 이동
+            glVertex3f(h, -h, 0.0f);  // 오른쪽 아래에서 시작
+            glVertex3f(h, h, 0.0f);   // 오른쪽 위로 이동
+        
+           
             glEnd();
-
+            
+            glFlush();
             glPopMatrix();
         }
     }

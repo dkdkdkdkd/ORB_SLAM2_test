@@ -47,7 +47,6 @@ void Map::AddArucoMarker(ArucoMarker *pAM)
 {   
     unique_lock<mutex> lock(mMutexMap);
     bool markerExists = false;
-
     for (ArucoMarker *marker : mspAruceMarker){
         if (marker->mMarkerId == pAM->mMarkerId){
             marker->SetMarkerPos(pAM->pose);
@@ -57,7 +56,6 @@ void Map::AddArucoMarker(ArucoMarker *pAM)
     }
     if (!markerExists)
         mspAruceMarker.insert(pAM);
-
 }
 
 void Map::EraseMapPoint(MapPoint *pMP)

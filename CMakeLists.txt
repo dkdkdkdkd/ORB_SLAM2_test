@@ -69,7 +69,7 @@ src/KeyFrameDatabase.cc
 src/Sim3Solver.cc
 src/Initializer.cc
 src/Viewer.cc
-src/AruceMarker.cc
+src/ArucoMarker.cc
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -422,9 +422,13 @@ void Tracking::Track()
             mState=LOST;
         
         // Update drawer
-        mpFrameDrawer->Update(this);
+        std::vector<int> markerIds;
+        cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_1000);
+        std::vector<std::vector<cv::Point2f>> markerCorners;
         
-        cv::aruco::detectMarkers(mImGray, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
+        int test = 1;
+        cv::aruco::detectMarkers(mImGray, dictionary, markerCorners, markerIds);
+        cv::aruco::drawDetectedMarkers(mImGray, markerCorners, markerIds);
         float ratio=0.084f;
         vector<Point3f> objectPoints = {Point3f(ratio, ratio, 0),
                                         Point3f(ratio, -ratio, 0), 
@@ -438,11 +442,16 @@ void Tracking::Track()
         Mat tvec, rvec;
         if(markerCorners.size()!=0){
             solvePnP(objectPoints, markerCorners[0], mK, mDistCoef, rvec, tvec);
-            // Mat wtvec = mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3) *tvec  + mCurrentFrame.mTcw.rowRange(0,3).col(3);
-            Mat wtvec = mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv()*(tvec-mCurrentFrame.mTcw.rowRange(0,3).col(3));
-            ArucoMarker* mark = new ArucoMarker(markerIds[0], mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv(), wtvec);
-            mpMap->AddArucoMarker(mark);
+            // Mat wtvec = mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3)*(tvec-mCurrentFrame.mTcw.rowRange(0,3).col(3));
+            if (!mCurrentFrame.mTcw.empty()){
+                Mat wtvec = mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv()*(tvec-mCurrentFrame.mTcw.rowRange(0,3).col(3));
+                ArucoMarker* mark = new ArucoMarker(markerIds[0], mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv(), wtvec);
+                mpMap->AddArucoMarker(mark);
+            }
+            
         }
+        
+        mpFrameDrawer->Update(this);
 
 
 
@@ -1632,13 +1641,14 @@ void System::SaveEntireMap(const string &dir) {
         f_pts << setprecision(9) << pos.at<float>(0) << " " << pos.at<float>(1) << " " << pos.at<float>(2) << endl;
     }
 
-    string fname_arucomarker = dir + "/AruceMarkers.txt";
+    string fname_arucomarker = dir + "/ArucoMarkers.txt";
     ofstream f_ams;
     f_ams.open(fname_arucomarker.c_str());
     f_ams << fixed;
     cout<<"marker save"<<endl;
 
     auto mvpArucoMarker = mpMap->GetAllArucoMarker();
+    sort(mvpArucoMarker.begin(), mvpArucoMarker.end(), ArucoMarker::lId);
     for (ArucoMarker *pMO : mvpArucoMarker) {
         if (!pMO){
             cout<<"marker None"<<endl;
