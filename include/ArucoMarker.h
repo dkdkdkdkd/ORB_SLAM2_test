@@ -45,6 +45,11 @@ public:
     static std::mutex mGlobalMutex;
     
     std::mutex mMutexPos;
+
+    static bool lId(ArucoMarker* pAM1, ArucoMarker* pAM2)
+    {
+        return pAM1->mMarkerId < pAM2->mMarkerId;
+    }
 };
 
 } //namespace ORB_SLAM

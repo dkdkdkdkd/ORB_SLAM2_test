@@ -110,7 +110,10 @@ cv::Mat FrameDrawer::DrawFrame()
                 {
                     // cv::rectangle(im,pt1,pt2,cv::Scalar(0,255,0));
                     cv::circle(im,vCurrentKeys[i].pt,2,cv::Scalar(0,255,0),-1);
-                    cv::aruco::drawDetectedMarkers(im, markerCorners, markerIds);
+                    // cout<<"dreawframe"<<endl;
+                    // cout<<markerCorners.size()<<endl;
+                    // cout<<markerIds.size()<<endl;
+                    // cv::aruco::drawDetectedMarkers(im, markerCorners, markerIds);
                     mnTracked++;
                 }
                 else // This is match to a "visual odometry" MapPoint created in the last frame
