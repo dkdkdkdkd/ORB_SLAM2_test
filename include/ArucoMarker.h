@@ -38,7 +38,6 @@ public:
     int mMarkerId;
     cv::Mat pose;
 
-
     void SetMarkerPos(cv::Mat pos);
     cv :: Mat GetMarkerPos();
     

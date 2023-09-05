@@ -20,7 +20,6 @@
 
 #include "FrameDrawer.h"
 #include "Tracking.h"
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/aruco.hpp>
@@ -110,10 +109,7 @@ cv::Mat FrameDrawer::DrawFrame()
                 {
                     // cv::rectangle(im,pt1,pt2,cv::Scalar(0,255,0));
                     cv::circle(im,vCurrentKeys[i].pt,2,cv::Scalar(0,255,0),-1);
-                    // cout<<"dreawframe"<<endl;
-                    // cout<<markerCorners.size()<<endl;
-                    // cout<<markerIds.size()<<endl;
-                    // cv::aruco::drawDetectedMarkers(im, markerCorners, markerIds);
+                    cv::aruco::drawDetectedMarkers(im, mvcurrentmarkerCorners, mvcurrentmarkerIds);
                     mnTracked++;
                 }
                 else // This is match to a "visual odometry" MapPoint created in the last frame
@@ -172,17 +168,18 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)
 }
 
 void FrameDrawer::Update(Tracking *pTracker)
-{
+{   
     unique_lock<mutex> lock(mMutex);
+    // add mvcurrentmarkerIds, mvcurrentmarkerCorners
+    mvcurrentmarkerIds = pTracker->mCurrentFrame.markerIds;
+    mvcurrentmarkerCorners = pTracker->mCurrentFrame.markerCorners;
+
     pTracker->mImGray.copyTo(mIm);
     mvCurrentKeys=pTracker->mCurrentFrame.mvKeys;
     N = mvCurrentKeys.size();
     mvbVO = vector<bool>(N,false);
     mvbMap = vector<bool>(N,false);
     mbOnlyTracking = pTracker->mbOnlyTracking;
-    
-    markerIds = pTracker->markerIds;
-    markerCorners = pTracker->markerCorners;
 
     if(pTracker->mLastProcessedState==Tracking::NOT_INITIALIZED)
     {

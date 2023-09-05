@@ -47,13 +47,13 @@ public:
 
     // Draw last processed frame.
     cv::Mat DrawFrame();
-
-    std::vector<int> markerIds;
-    std::vector<std::vector<cv::Point2f>> markerCorners;
     
 protected:
 
     void DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText);
+
+    std::vector<int> mvcurrentmarkerIds;
+    std::vector<std::vector<cv::Point2f>> mvcurrentmarkerCorners;
 
     // Info of the frame to be drawn
     cv::Mat mIm;

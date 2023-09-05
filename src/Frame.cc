@@ -22,6 +22,11 @@
 #include "Converter.h"
 #include "ORBmatcher.h"
 #include <thread>
+#include "opencv2/opencv.hpp"
+#include <opencv2/aruco.hpp>
+
+using namespace cv;
+
 
 namespace ORB_SLAM2
 {
@@ -81,6 +86,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
     threadRight.join();
 
     N = mvKeys.size();
+    mArucoInlierId = vector<int>(N, -1);
 
     if(mvKeys.empty())
         return;
@@ -113,6 +119,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
 
     mb = mbf/fx;
 
+    CheckArucoInlier(imLeft);
     AssignFeaturesToGrid();
 }
 
@@ -136,6 +143,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeSt
     ExtractORB(0,imGray);
 
     N = mvKeys.size();
+    mArucoInlierId = vector<int>(N, -1);
 
     if(mvKeys.empty())
         return;
@@ -166,7 +174,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeSt
     }
 
     mb = mbf/fx;
-
+    CheckArucoInlier(imGray);
     AssignFeaturesToGrid();
 }
 
@@ -175,6 +183,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
     :mpORBvocabulary(voc),mpORBextractorLeft(extractor),mpORBextractorRight(static_cast<ORBextractor*>(NULL)),
      mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth)
 {
+    
     // Frame ID
     mnId=nNextId++;
 
@@ -191,6 +200,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
     ExtractORB(0,imGray);
 
     N = mvKeys.size();
+    mArucoInlierId = vector<int>(N, -1);
 
     if(mvKeys.empty())
         return;
@@ -223,7 +233,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
     }
 
     mb = mbf/fx;
-
+    CheckArucoInlier(imGray);
     AssignFeaturesToGrid();
 }
 
@@ -678,6 +688,38 @@ cv::Mat Frame::UnprojectStereo(const int &i)
     }
     else
         return cv::Mat();
+}
+
+void Frame::CheckArucoInlier(const cv::Mat &imGray)
+{
+    cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_1000);
+    cv::aruco::detectMarkers(imGray, dictionary, markerCorners, markerIds);
+     
+    for (int k = 0; k < N; k++)
+    {
+        
+        for (int j = 0; j < markerCorners.size(); j++){
+
+            float sum = 0.0;
+            
+            for (int i = 0; i < 4; i++)
+            {
+                Point2f v1 = Point2f(markerCorners[j][i].x-mvKeys[k].pt.x, markerCorners[j][i].y-mvKeys[k].pt.y);
+                Point2f v2 = Point2f(markerCorners[j][(i+1)%4].x-mvKeys[k].pt.x, markerCorners[j][(i+1)%4].y-mvKeys[k].pt.y);
+                sum += abs(v1.x * v2.y - v1.y * v2.x);
+            }
+            Point2f ba = Point2f(markerCorners[j][0].x-markerCorners[j][1].x, markerCorners[j][0].y-markerCorners[j][1].y);
+            Point2f bc = Point2f(markerCorners[j][2].x-markerCorners[j][1].x, markerCorners[j][2].y-markerCorners[j][1].y) ;      
+        
+            float rec = abs(ba.x*bc.y - ba.y*bc.x);
+            
+            if (sum/2 <= rec)
+                mArucoInlierId[k] = markerIds[j];
+
+        }
+    }
+    
+
 }
 
 } //namespace ORB_SLAM

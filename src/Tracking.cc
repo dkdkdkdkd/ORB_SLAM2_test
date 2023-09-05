@@ -24,6 +24,7 @@
 #include <opencv2/aruco.hpp>
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
+#include <opencv2/calib3d.hpp>
 
 #include"ORBmatcher.h"
 #include"FrameDrawer.h"
@@ -422,34 +423,34 @@ void Tracking::Track()
             mState=LOST;
         
         // Update drawer
-        std::vector<int> markerIds;
-        cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_1000);
-        std::vector<std::vector<cv::Point2f>> markerCorners;
+        // std::vector<int> markerIds;
+        // cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_1000);
+        // std::vector<std::vector<cv::Point2f>> markerCorners;
         
-        int test = 1;
-        cv::aruco::detectMarkers(mImGray, dictionary, markerCorners, markerIds);
-        cv::aruco::drawDetectedMarkers(mImGray, markerCorners, markerIds);
-        float ratio=0.084f;
-        vector<Point3f> objectPoints = {Point3f(ratio, ratio, 0),
-                                        Point3f(ratio, -ratio, 0), 
-                                        Point3f(-ratio, -ratio , 0),
-                                        Point3f(-ratio, ratio , 0)};
+        // int test = 1;
+        // cv::aruco::detectMarkers(mImGray, dictionary, markerCorners, markerIds);
+        // cv::aruco::drawDetectedMarkers(mImGray, markerCorners, markerIds);
+        // float ratio=0.0775f;
+        // vector<Point3f> objectPoints = {Point3f(ratio, ratio, 0),
+        //                                 Point3f(ratio, -ratio, 0), 
+        //                                 Point3f(-ratio, -ratio , 0),
+        //                                 Point3f(-ratio, ratio , 0)};
 
-                                        // {Point3f(0.084, 0.084, 0),
-                                        // Point3f(0.084, -0.084, 0), 
-                                        // Point3f(-0.084, -0.084 , 0),
-                                        // Point3f(-0.084, 0.084 , 0)};
-        Mat tvec, rvec;
-        if(markerCorners.size()!=0){
-            solvePnP(objectPoints, markerCorners[0], mK, mDistCoef, rvec, tvec);
-            // Mat wtvec = mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3)*(tvec-mCurrentFrame.mTcw.rowRange(0,3).col(3));
-            if (!mCurrentFrame.mTcw.empty()){
-                Mat wtvec = mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv()*(tvec-mCurrentFrame.mTcw.rowRange(0,3).col(3));
-                ArucoMarker* mark = new ArucoMarker(markerIds[0], mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv(), wtvec);
-                mpMap->AddArucoMarker(mark);
-            }
+        //                                 // {Point3f(0.084, 0.084, 0),
+        //                                 // Point3f(0.084, -0.084, 0), 
+        //                                 // Point3f(-0.084, -0.084 , 0),
+        //                                 // Point3f(-0.084, 0.084 , 0)};
+        // Mat tvec, rvec;
+        // if(markerCorners.size()!=0){
+        //     solvePnPRansac(objectPoints, markerCorners[0], mK, mDistCoef, rvec, tvec);
             
-        }
+        //     if (!mCurrentFrame.mTcw.empty()){
+        //         Mat wtvec = mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv()*(tvec-mCurrentFrame.mTcw.rowRange(0,3).col(3));
+        //         ArucoMarker* mark = new ArucoMarker(markerIds[0], mCurrentFrame.mTcw.rowRange(0,3).colRange(0,3).inv(), wtvec);
+        //         mpMap->AddArucoMarker(mark);
+        //     }
+            
+        // }
         
         mpFrameDrawer->Update(this);
 

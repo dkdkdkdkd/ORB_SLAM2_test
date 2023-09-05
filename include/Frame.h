@@ -98,7 +98,13 @@ public:
     // Backprojects a keypoint (if stereo/depth info available) into 3D world coordinates.
     cv::Mat UnprojectStereo(const int &i);
 
+    void CheckArucoInlier(const cv::Mat &imGray);
+
 public:
+    // marker inlier , if mArucoInlier is 
+    std::vector<int> mArucoInlierId;
+    std::vector<int> markerIds;
+    std::vector<std::vector<cv::Point2f>> markerCorners;
     // Vocabulary used for relocalization.
     ORBVocabulary* mpORBvocabulary;
 
