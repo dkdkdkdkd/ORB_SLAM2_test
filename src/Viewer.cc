@@ -130,8 +130,8 @@ void Viewer::Run()
         mpMapDrawer->DrawCurrentCamera(Twc);
         if(menuShowKeyFrames || menuShowGraph)
             mpMapDrawer->DrawKeyFrames(menuShowKeyFrames,menuShowGraph);
-        // if(menuArucoMarker)
-        //     mpMapDrawer->DrawArucoMarker(menuArucoMarker);
+        if(menuArucoMarker)
+            mpMapDrawer->DrawArucoMarker(menuArucoMarker);
         if(menuShowPoints)
             mpMapDrawer->DrawMapPoints();
 

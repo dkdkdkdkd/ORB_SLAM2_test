@@ -21,6 +21,8 @@
 #include "KeyFrame.h"
 #include "Converter.h"
 #include "ORBmatcher.h"
+#include "KeyFrame.h"
+#include "ArucoInfo.h"
 #include<mutex>
 
 namespace ORB_SLAM2
@@ -41,7 +43,7 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
     mvInvLevelSigma2(F.mvInvLevelSigma2), mnMinX(F.mnMinX), mnMinY(F.mnMinY), mnMaxX(F.mnMaxX),
     mnMaxY(F.mnMaxY), mK(F.mK), mvpMapPoints(F.mvpMapPoints), mpKeyFrameDB(pKFDB),
     mpORBvocabulary(F.mpORBvocabulary), mbFirstConnection(true), mpParent(NULL), mbNotErase(false),
-    mbToBeErased(false), mbBad(false), mHalfBaseline(F.mb/2), mpMap(pMap), mArucoInlierId(F.mArucoInlierId) 
+    mbToBeErased(false), mbBad(false), mHalfBaseline(F.mb/2), mpMap(pMap), mMarkerInfos(F.markerInfos)
 {
     mnId=nNextId++;
 
@@ -64,6 +66,65 @@ void KeyFrame::ComputeBoW()
         // Feature vector associate features with nodes in the 4th level (from leaves up)
         // We assume the vocabulary tree has 6 levels, change the 4 otherwise
         mpORBvocabulary->transform(vCurrentDesc,mBowVec,mFeatVec,4);
+    }
+}
+
+void KeyFrame::GetArucoMarkerPose()
+{   
+    // cout<<mMarkerInfos.size()<< "info" << endl;
+    for(ArucoInfo &markerInfo : mMarkerInfos){
+        cv::Point3f oCenter;
+        cv::Point2f PCenter;
+        std::vector<cv::Point3f> objectPoints;
+        
+        std::vector<cv::Point2f> pPoints;
+        if(!mvpMapPoints[markerInfo.centerPointIndex])
+                continue;
+        else{
+            oCenter = cv::Point3f(mvpMapPoints[markerInfo.centerPointIndex]->mWorldPos.at<float>(0),
+                                    mvpMapPoints[markerInfo.centerPointIndex]->mWorldPos.at<float>(1), 
+                                    mvpMapPoints[markerInfo.centerPointIndex]->mWorldPos.at<float>(2));
+            PCenter = cv::Point2f(mvKeysUn[markerInfo.centerPointIndex].pt.x, mvKeysUn[markerInfo.centerPointIndex].pt.y);
+        }
+        for(const int &idx : markerInfo.markerCornerIndex){
+            if(!mvpMapPoints[idx])
+                continue;
+            else{
+                objectPoints.push_back(cv::Point3f(mvpMapPoints[idx]->mWorldPos.at<float>(0),
+                                        mvpMapPoints[idx]->mWorldPos.at<float>(1), 
+                                        mvpMapPoints[idx]->mWorldPos.at<float>(2)));
+                pPoints.push_back(cv::Point2f(mvKeys[idx].pt.x, mvKeys[idx].pt.y));
+            }
+        }
+        if(objectPoints.size()==4 && pPoints.size()==4){
+            
+            float dx = (cv::norm(objectPoints[0] - objectPoints[1]) + cv::norm(objectPoints[2] - objectPoints[3]))/4;
+            float dy = (cv::norm(objectPoints[0] - objectPoints[3]) + cv::norm(objectPoints[1] -  objectPoints[2]))/4;
+
+            std::vector<cv::Point3f> vObjectPoints = {cv::Point3f(-dx, dy, 0),
+                                                      cv::Point3f(dx, dy, 0), 
+                                                      cv::Point3f(dx, -dy , 0),
+                                                      cv::Point3f(-dx, -dy , 0)};   
+
+            cv::Mat rvec, tvec;
+            cv::Mat distCoeffs(1, 5, CV_32F, cv::Scalar(0));  
+
+            cv::solvePnPRansac(vObjectPoints, pPoints, mK, distCoeffs, rvec, tvec);
+            tvec.convertTo(tvec, CV_32F);
+            rvec.convertTo(rvec, CV_32F);
+
+            if (!Tcw.empty()){
+                // cv::Mat wtvec = Tcw.rowRange(0,3).colRange(0,3).inv()*(tvec-Tcw.rowRange(0,3).col(3));
+                cv::Mat wtvec(3, 1, CV_32FC1);
+                wtvec.at<float>(0, 0) = oCenter.x;
+                wtvec.at<float>(1, 0) = oCenter.y;
+                wtvec.at<float>(2, 0) = oCenter.z;
+                cv::Mat R;
+                cv::Rodrigues(rvec, R);
+                ArucoMarker* mark = new ArucoMarker(markerInfo.arucoId, Tcw.rowRange(0,3).colRange(0,3).inv()*R, wtvec);
+                mpMap->AddArucoMarker(mark);
+            }
+        }                        
     }
 }
 

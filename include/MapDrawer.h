@@ -35,7 +35,7 @@ class MapDrawer
 {
 public:
     MapDrawer(Map* pMap, const string &strSettingPath);
-
+    
     Map* mpMap;
 
     void DrawMapPoints();
@@ -48,6 +48,8 @@ public:
 
     // aruco marker add
     void DrawMarkers();
+
+    
 private:
 
     float mKeyFrameSize;

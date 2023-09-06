@@ -24,7 +24,7 @@
 #include <thread>
 #include "opencv2/opencv.hpp"
 #include <opencv2/aruco.hpp>
-
+#include "ArucoInfo.h"
 using namespace cv;
 
 
@@ -67,6 +67,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
     :mpORBvocabulary(voc),mpORBextractorLeft(extractorLeft),mpORBextractorRight(extractorRight), mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth),
      mpReferenceKF(static_cast<KeyFrame*>(NULL))
 {
+    imLeft.copyTo(mImGray);
     // Frame ID
     mnId=nNextId++;
 
@@ -86,7 +87,6 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
     threadRight.join();
 
     N = mvKeys.size();
-    mArucoInlierId = vector<int>(N, -1);
 
     if(mvKeys.empty())
         return;
@@ -119,7 +119,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
 
     mb = mbf/fx;
 
-    CheckArucoInlier(imLeft);
+    CheckArucoInlier();
     AssignFeaturesToGrid();
 }
 
@@ -127,6 +127,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeSt
     :mpORBvocabulary(voc),mpORBextractorLeft(extractor),mpORBextractorRight(static_cast<ORBextractor*>(NULL)),
      mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth)
 {
+    imGray.copyTo(mImGray);
     // Frame ID
     mnId=nNextId++;
 
@@ -143,7 +144,6 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeSt
     ExtractORB(0,imGray);
 
     N = mvKeys.size();
-    mArucoInlierId = vector<int>(N, -1);
 
     if(mvKeys.empty())
         return;
@@ -174,7 +174,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeSt
     }
 
     mb = mbf/fx;
-    CheckArucoInlier(imGray);
+    CheckArucoInlier();
     AssignFeaturesToGrid();
 }
 
@@ -183,8 +183,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
     :mpORBvocabulary(voc),mpORBextractorLeft(extractor),mpORBextractorRight(static_cast<ORBextractor*>(NULL)),
      mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth)
 {
-    
-    // Frame ID
+    imGray.copyTo(mImGray);  
     mnId=nNextId++;
 
     // Scale Level Info
@@ -200,7 +199,6 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
     ExtractORB(0,imGray);
 
     N = mvKeys.size();
-    mArucoInlierId = vector<int>(N, -1);
 
     if(mvKeys.empty())
         return;
@@ -233,7 +231,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
     }
 
     mb = mbf/fx;
-    CheckArucoInlier(imGray);
+    CheckArucoInlier();
     AssignFeaturesToGrid();
 }
 
@@ -690,36 +688,52 @@ cv::Mat Frame::UnprojectStereo(const int &i)
         return cv::Mat();
 }
 
-void Frame::CheckArucoInlier(const cv::Mat &imGray)
+void Frame::CheckArucoInlier()
 {
     cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_1000);
-    cv::aruco::detectMarkers(imGray, dictionary, markerCorners, markerIds);
-     
-    for (int k = 0; k < N; k++)
-    {
-        
-        for (int j = 0; j < markerCorners.size(); j++){
+    if (!mImGray.empty()){
 
-            float sum = 0.0;
-            
+        cv::aruco::detectMarkers(mImGray, dictionary, markerCorners, markerIds);
+
+        for (int k = 0; k < markerCorners.size() ; k++)
+        {
+            ArucoInfo markerInfo;
+            int centerMin =640;
+            int min[4] = {640, 640, 640, 640};
+            cv::Point2f center = cv::Point2f((markerCorners[k][0].x+markerCorners[k][2].x)/2,
+                                    (markerCorners[k][0].y+markerCorners[k][2].y)/2);
+
+            for (int j = 0; j < N; j++){
+                double tmp = cv::norm(center-mvKeysUn[j].pt);
+                if (centerMin>tmp){
+                    centerMin=tmp;
+                    markerInfo.centerPointIndex = j;
+                }
+                
+                for (int i = 0; i < 4; i++)
+                {
+                    double temp = cv::norm(markerCorners[k][i]-mvKeysUn[j].pt);
+                    if (min[i]>temp){
+                        min[i]=temp;
+                        markerInfo.markerCornerIndex[i] = j;
+                    }
+                }
+            }
+            int th = 5;
+            bool flag = true;
             for (int i = 0; i < 4; i++)
             {
-                Point2f v1 = Point2f(markerCorners[j][i].x-mvKeys[k].pt.x, markerCorners[j][i].y-mvKeys[k].pt.y);
-                Point2f v2 = Point2f(markerCorners[j][(i+1)%4].x-mvKeys[k].pt.x, markerCorners[j][(i+1)%4].y-mvKeys[k].pt.y);
-                sum += abs(v1.x * v2.y - v1.y * v2.x);
+                if (min[i]>th){
+                    flag = false;
+                    break;
+                }
             }
-            Point2f ba = Point2f(markerCorners[j][0].x-markerCorners[j][1].x, markerCorners[j][0].y-markerCorners[j][1].y);
-            Point2f bc = Point2f(markerCorners[j][2].x-markerCorners[j][1].x, markerCorners[j][2].y-markerCorners[j][1].y) ;      
-        
-            float rec = abs(ba.x*bc.y - ba.y*bc.x);
-            
-            if (sum/2 <= rec)
-                mArucoInlierId[k] = markerIds[j];
-
+            if(flag){
+                markerInfo.arucoId = k;
+                markerInfos.push_back(markerInfo);
+            }
         }
     }
-    
-
 }
 
 } //namespace ORB_SLAM

@@ -29,7 +29,7 @@
 #include "ORBVocabulary.h"
 #include "KeyFrame.h"
 #include "ORBextractor.h"
-
+#include "ArucoInfo.h"
 #include <opencv2/opencv.hpp>
 
 namespace ORB_SLAM2
@@ -98,11 +98,12 @@ public:
     // Backprojects a keypoint (if stereo/depth info available) into 3D world coordinates.
     cv::Mat UnprojectStereo(const int &i);
 
-    void CheckArucoInlier(const cv::Mat &imGray);
+    void CheckArucoInlier();
+    cv::Mat mImGray;
 
 public:
     // marker inlier , if mArucoInlier is 
-    std::vector<int> mArucoInlierId;
+    std::vector<ArucoInfo> markerInfos;
     std::vector<int> markerIds;
     std::vector<std::vector<cv::Point2f>> markerCorners;
     // Vocabulary used for relocalization.

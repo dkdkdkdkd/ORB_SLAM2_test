@@ -1,7 +1,7 @@
 cd ..
 cd build
 # cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j20
+make -j18
 cd ..
 cd Examples
 

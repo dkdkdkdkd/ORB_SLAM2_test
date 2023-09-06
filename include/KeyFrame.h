@@ -28,6 +28,7 @@
 #include "ORBextractor.h"
 #include "Frame.h"
 #include "KeyFrameDatabase.h"
+#include "ArucoInfo.h"
 
 #include <mutex>
 #include "BoostArchiver.h"
@@ -45,6 +46,12 @@ class KeyFrame
 public:
 
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
+
+    //arucomarker ---------------------------
+    
+    std::vector<ArucoInfo> mMarkerInfos;
+
+    void GetArucoMarkerPose();
 
     // Pose functions
     void SetPose(const cv::Mat &Tcw);
@@ -129,8 +136,7 @@ private:
 
     // The following variables are accesed from only 1 thread or never change (no mutex needed).
 public:
-    std::vector<int> mArucoInlierId;
-    
+
     static long unsigned int nNextId;
     long unsigned int mnId;
     const long unsigned int mnFrameId;

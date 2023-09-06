@@ -38,7 +38,8 @@ FrameDrawer::FrameDrawer(Map* pMap, bool bReuseMap):mpMap(pMap)
 }
 
 cv::Mat FrameDrawer::DrawFrame()
-{
+{   
+    
     cv::Mat im;
     vector<cv::KeyPoint> vIniKeys; // Initialization: KeyPoints in reference frame
     vector<int> vMatches; // Initialization: correspondeces with reference keypoints
@@ -108,7 +109,9 @@ cv::Mat FrameDrawer::DrawFrame()
                 if(vbMap[i])
                 {
                     // cv::rectangle(im,pt1,pt2,cv::Scalar(0,255,0));
+                    
                     cv::circle(im,vCurrentKeys[i].pt,2,cv::Scalar(0,255,0),-1);
+
                     cv::aruco::drawDetectedMarkers(im, mvcurrentmarkerCorners, mvcurrentmarkerIds);
                     mnTracked++;
                 }
@@ -173,7 +176,6 @@ void FrameDrawer::Update(Tracking *pTracker)
     // add mvcurrentmarkerIds, mvcurrentmarkerCorners
     mvcurrentmarkerIds = pTracker->mCurrentFrame.markerIds;
     mvcurrentmarkerCorners = pTracker->mCurrentFrame.markerCorners;
-
     pTracker->mImGray.copyTo(mIm);
     mvCurrentKeys=pTracker->mCurrentFrame.mvKeys;
     N = mvCurrentKeys.size();

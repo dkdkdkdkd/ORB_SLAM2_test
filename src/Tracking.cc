@@ -399,7 +399,6 @@ void Tracking::Track()
                 }
             }
         }
-
         mCurrentFrame.mpReferenceKF = mpReferenceKF;
 
         // If we have an initial estimation of the camera pose and matching. Track the local map.
@@ -519,6 +518,8 @@ void Tracking::Track()
 
         if(!mCurrentFrame.mpReferenceKF)
             mCurrentFrame.mpReferenceKF = mpReferenceKF;
+        else
+            mpReferenceKF->GetArucoMarkerPose();
 
         mLastFrame = Frame(mCurrentFrame);
     }

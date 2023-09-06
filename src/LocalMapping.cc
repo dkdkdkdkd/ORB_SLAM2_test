@@ -432,11 +432,12 @@ void LocalMapping::CreateNewMapPoints()
 
             // Triangulation is succesfull
             MapPoint* pMP = new MapPoint(x3D,mpCurrentKeyFrame,mpMap);
-
+            
             pMP->AddObservation(mpCurrentKeyFrame,idx1);            
             pMP->AddObservation(pKF2,idx2);
 
             mpCurrentKeyFrame->AddMapPoint(pMP,idx1);
+        
             pKF2->AddMapPoint(pMP,idx2);
 
             pMP->ComputeDistinctiveDescriptors();
@@ -449,6 +450,7 @@ void LocalMapping::CreateNewMapPoints()
             nnew++;
         }
     }
+    // mpCurrentKeyFrame->GetArucoMarkerPose();
 }
 
 void LocalMapping::SearchInNeighbors()

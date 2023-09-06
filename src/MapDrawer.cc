@@ -185,17 +185,17 @@ void MapDrawer::DrawArucoMarker(const bool bDrawAM)
 
     if(bDrawAM)
     {
+       
         for(size_t i=0; i<vpAMs.size(); i++)
         {
             ArucoMarker* pKF = vpAMs[i];
             cv::Mat Twc = pKF->GetMarkerPos().t();
-
             glPushMatrix();
 
             glMultMatrixf(Twc.ptr<GLfloat>(0));
 
             glLineWidth(mKeyFrameLineWidth);
-            glColor3f(1.0f,0.0f,0.0f);
+            glColor3f(0.0f,0.0f,0.0f);
             glBegin(GL_LINES);
              
             glVertex3f(h, h, 0.0f);   // 오른쪽 위에서 시작
